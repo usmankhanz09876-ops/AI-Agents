@@ -3,8 +3,7 @@ import json
 from datetime import date
 from groq import Groq
 from fastapi import FastAPI, HTTPException
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -19,7 +18,6 @@ app.add_middleware(
 
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-# In-memory store (resets on cold start — replace with a DB for persistence)
 entries_store: list = []
 
 
@@ -27,9 +25,11 @@ class UserInput(BaseModel):
     text: str
 
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 def root():
-    return FileResponse("static/index.html")
+    html_path = os.path.join(os.path.dirname(__file__), "..", "static", "index.html")
+    with open(html_path, "r") as f:
+        return f.read()
 
 
 @app.post("/add")
@@ -86,6 +86,3 @@ def analyze():
 @app.get("/entries")
 def get_entries():
     return {"entries": entries_store}
-
-
-app.mount("/static", StaticFiles(directory="static"), name="static")
