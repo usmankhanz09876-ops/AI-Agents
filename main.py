@@ -84,7 +84,7 @@ def analyze():
     if not summary["expenses"] and summary["income"] == 0:
         raise HTTPException(status_code=400, detail="No data yet. Add some income/expenses first.")
     response = client.chat.completions.create(
-        model="llama3-8b-8192",
+        model="llama-3.1-8b-instant",
         messages=[
             {
                 "role": "system",

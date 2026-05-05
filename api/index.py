@@ -1,9 +1,10 @@
 import os
 import json
+import traceback
 from datetime import date
 from groq import Groq
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -23,6 +24,11 @@ entries_store: list = []
 
 class UserInput(BaseModel):
     text: str
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(status_code=500, content={"error": str(exc), "trace": traceback.format_exc()})
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -67,7 +73,7 @@ def analyze():
         elif e["type"] == "expense":
             summary["expenses"][e["category"]] = summary["expenses"].get(e["category"], 0) + e["amount"]
     response = client.chat.completions.create(
-        model="llama3-8b-8192",
+        model="llama-3.1-8b-instant",
         messages=[
             {
                 "role": "system",
