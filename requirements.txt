@@ -1,2 +1,6 @@
 groq
 openpyxl
+fastapi
+uvicorn
+python-dotenv
+python-multipart
